@@ -83,7 +83,7 @@ int CutAndPaste(sr_t** Left, sr_t** Right,
   (*Right)->next = NULL;
 
   numElems = FreeItems(tmp);
-  
+
   return(numElems);
 }
 
@@ -110,6 +110,10 @@ sr_t* RequestMemoryNewSR()
   
   if ((s = (sr_t *) malloc(sizeof(sr_t))) == NULL)
     printError("Not enough space to hold one new SR");
+
+  // Initilize array
+  for(int i=0;i<LOCUSLENGTH;i++)
+  	s->Locus[i] = 0;
   
   return(s);
 }

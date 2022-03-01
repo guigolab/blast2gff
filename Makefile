@@ -14,6 +14,9 @@ PROGRAM= blast2gff
 PRODUCT= $(BIN)/$(PROGRAM)
 CC= gcc
 OPTS=-I$(INCLUDE) -Wall
+ifdef DEBUG
+	OPTS+=-g -Og
+endif
 
 #######
 

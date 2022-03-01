@@ -17,6 +17,15 @@ int   VRB=0, GFFIN, PSR=1 ,GFFOUT=0;
 /* Accounting time and results */
 account *m;  
 
+void FreeSR(sr_t* q)
+{
+  
+  if (q != NULL) {
+    FreeSR(q->next);
+    free(q);
+  }
+}
+
 int main (int argc, char *argv[])
 {
   /* Input Files */
@@ -73,6 +82,28 @@ int main (int argc, char *argv[])
 
   /* The End */
   OutputTime(); 
+
+   /* Free allocated memory */
+   /* Free SR */
+  for(int i=0; i<STRANDS*FRAMES; i++) {
+    FreeSR(allSr->sr[i]);      
+  }
+  free(allSr);
+  
+  /* Free HSPs */
+  for(int i=0;i<STRANDS*FRAMES;i++) {
+    for(int j=0;j<allHsp->nTotalHsps;j++)
+      free(allHsp->hsps[i][j]);
+    free(allHsp->hsps[i]);
+  }
+  free(allHsp->hsps);
+  free(allHsp->nHsps);
+  free(allHsp);
+  
+  /* Free account data */
+  free(m);
+
+  /* Exit */
   exit(0);
   return(0);   
 }
