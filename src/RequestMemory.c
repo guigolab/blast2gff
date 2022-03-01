@@ -33,7 +33,7 @@ packHSP* RequestMemoryHSP()
 
   /* Counters */
   if ((allHsp->nHsps =
-       (long*) calloc(STRANDS*FRAMES, sizeof(int)))  == NULL)
+       (long*) calloc(STRANDS*FRAMES, sizeof(long)))  == NULL)
     printError("Not enough space to hold HSP counters");  
 
   /* Hack of Alpha */
