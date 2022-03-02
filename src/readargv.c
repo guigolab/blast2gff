@@ -50,13 +50,16 @@ void readargv (int argc,char* argv[],
 	break;
       case 'v': VRB++; 
 	break;
-      case 'h': printHelp();
-	exit(1);
+      case 'h': 
+        printHelp();
+	      exit(1);
 	break;
       }
 
-  if (error)
+  if (error) {
     printError(USAGE);
+    exit(1);
+  }
 
   /* Setup Errors: Wrong number of filenames */
   /* Get the name of the file *.hsp */
@@ -65,15 +68,17 @@ void readargv (int argc,char* argv[],
       strcpy(HSPFile,argv[optind]);
       optind++;
       if (optind < argc)
-	{ 
-	  sprintf(mess,"Too many files. Only one filename needed\n%s",USAGE);
-	  printError(mess);
-	}
+      { 
+        sprintf(mess,"Too many files. Only one filename needed\n%s",USAGE);
+        printError(mess);
+        exit(1);
+      }
     }
   else
     {
       sprintf(mess,"Where is the HSP file?\n%s",USAGE);
       printError(mess);
+      exit(1);
     }
 }
 

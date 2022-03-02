@@ -12,19 +12,10 @@
 #include "blast2gff.h"
 
 /* Setup Flags of blast2gff */
-int   VRB=0, GFFIN, PSR=1 ,GFFOUT=0;
+int VRB=0, GFFIN, PSR=1 ,GFFOUT=0;
 
 /* Accounting time and results */
 account *m;  
-
-void FreeSR(sr_t* q)
-{
-  
-  if (q != NULL) {
-    FreeSR(q->next);
-    free(q);
-  }
-}
 
 int main (int argc, char *argv[])
 {
@@ -42,20 +33,35 @@ int main (int argc, char *argv[])
 
   char mess[MAXSTRING];
 
+  /* Read setup options */
+  readargv(argc,argv,HSPFile);
+  
   /* initializing stats... */
   m = (account*)InitAcc(); 
 
-  /* Read setup options */
-  readargv(argc,argv,HSPFile);
-
   /* Alloc main memory structures */
-  printMess("Request Memory to System");
-  allHsp =      (packHSP*) RequestMemoryHSP();
-  allSr  =      (packSR*) RequestMemorySR(); 
+  printMess("Request Memory to System for HSPs");
+  allHsp = (packHSP*) RequestMemoryHSP();
+  if (allHsp == NULL) {
+    FreeAcc(m);
+    return(1);
+  }
 
   /* Reading HSPs */
   printMess("Reading HSP file");
-  ReadHSP(allHsp,HSPFile,Query);
+  int nHsps = ReadHSP(allHsp,HSPFile,Query);
+  if (nHsps <= 0) {
+    /* 
+      Empty file or reading error
+      Cleanup
+    */
+    FreeMemoryHSP(allHsp);
+    FreeAcc(m);
+    
+    /* Exit */
+    int ret = abs(nHsps);
+    return(ret);
+  }
   sprintf(mess,"%ld HSPs read",allHsp->nTotalHsps);
   printMess(mess);
   
@@ -66,8 +72,20 @@ int main (int argc, char *argv[])
   /* Project HSP to SR */
   if (PSR)
     {
+      printMess("Request Memory to System for SRs");
+      allSr = (packSR*) RequestMemorySR();
+      if (allSr == NULL) {
+        FreeAcc(m);
+        FreeMemoryHSP(allHsp);
+        return(1);
+      }
       printMess("Project HSPs to SRs");
-      ProjectHSP(allHsp, allSr);
+      if (ProjectHSP(allHsp, allSr) != 0) {
+        FreeAcc(m);
+        FreeMemoryHSP(allHsp);
+        FreeMemorySR(allSr);
+        return(1);
+      };
 
       printMess("Simplifiying SRs");
       JoinSR(allSr);
@@ -83,27 +101,12 @@ int main (int argc, char *argv[])
   /* The End */
   OutputTime(); 
 
-   /* Free allocated memory */
-   /* Free SR */
-  for(int i=0; i<STRANDS*FRAMES; i++) {
-    FreeSR(allSr->sr[i]);      
-  }
-  free(allSr);
-  
-  /* Free HSPs */
-  for(int i=0;i<STRANDS*FRAMES;i++) {
-    for(int j=0;j<allHsp->nTotalHsps;j++)
-      free(allHsp->hsps[i][j]);
-    free(allHsp->hsps[i]);
-  }
-  free(allHsp->hsps);
-  free(allHsp->nHsps);
-  free(allHsp);
-  
-  /* Free account data */
-  free(m);
+  /* Free allocated memory */
+  if (PSR)
+    FreeMemorySR(allSr);
+  FreeMemoryHSP(allHsp);
+  FreeAcc(m);
 
   /* Exit */
-  exit(0);
   return(0);   
 }

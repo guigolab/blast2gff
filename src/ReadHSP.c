@@ -42,8 +42,10 @@ long ReadHSP_RAW(packHSP* h,char *FileName)
   long L;
   char Subject[LOCUSLENGTH];
 
-  if ((file=fopen(FileName, "r"))==NULL)
+  if ((file=fopen(FileName, "r"))==NULL) {
     printError("The HSP file file cannot be open for read");
+	return -1;
+  }
   
   i = 0;
   while(fgets(line,MAXLINE,file)!=NULL)
@@ -72,6 +74,8 @@ long ReadHSP_RAW(packHSP* h,char *FileName)
 	    {
 	      sprintf(mess, "Error reading HPS: line %d\n",i);
 	      printError(mess);
+		  fclose(file);
+		  return -1;
 	    }
 	  else
 	    {
@@ -124,8 +128,10 @@ long ReadHSP_GFF (packHSP* h,char *FileName, char Query[LOCUSLENGTH])
   char Subject[LOCUSLENGTH];
 
 
-  if ((file=fopen(FileName, "r"))==NULL)
+  if ((file=fopen(FileName, "r"))==NULL) {
     printError("The HSP file file cannot be open for read");
+	return -1;
+  }
   
   i = 0;
   while(fgets(line,MAXLINE,file)!=NULL)
@@ -147,6 +153,8 @@ long ReadHSP_GFF (packHSP* h,char *FileName, char Query[LOCUSLENGTH])
 	    {
 	      sprintf(mess, "Error reading HPS: line %d\n",i);
 	      printError(mess);
+		  fclose(file);
+		  return -1;
 	    }
 	  else
 	    {
@@ -177,13 +185,14 @@ long ReadHSP_GFF (packHSP* h,char *FileName, char Query[LOCUSLENGTH])
   return(h->nTotalHsps);
 }
 
-void ReadHSP (packHSP* allHsp,char* HSPFile, char Query[LOCUSLENGTH])
+int ReadHSP (packHSP* allHsp,char* HSPFile, char Query[LOCUSLENGTH])
 {
+  int nHsps;
   if (GFFIN)
-    ReadHSP_GFF(allHsp,HSPFile,Query); 
-  else
-    {
-      ReadHSP_RAW(allHsp,HSPFile); 
-      strcpy(Query,NONAME);
-    }
+    nHsps = ReadHSP_GFF(allHsp,HSPFile,Query); 
+  else {
+    nHsps = ReadHSP_RAW(allHsp,HSPFile); 
+    strcpy(Query,NONAME);
+  }
+  return nHsps;
 }

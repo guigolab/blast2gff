@@ -32,8 +32,7 @@ void printRes(char* s)
 /* Printing error messages */
 void printError(char *s)
 {
-     fprintf(stderr,"Error: %s\n",s);
-	  exit(1);
+  fprintf(stderr,"Error: %s\n",s);
 }
 
 /* Get time of execution using account information */
@@ -136,7 +135,7 @@ void Output(packHSP* allHSP, packSR* allSR, char Query[LOCUSLENGTH])
     PrintHSP(allHSP,Query);
 
   if (PSR)
-      PrintSR(allSR,Query);
+    PrintSR(allSR,Query);
 }
 
 

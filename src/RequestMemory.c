@@ -17,24 +17,32 @@ packHSP* RequestMemoryHSP()
   int i; 
 
   if ((allHsp =
-       (packHSP*) malloc(sizeof(packHSP)))  == NULL)
+       (packHSP*) malloc(sizeof(packHSP))) == NULL) {
     printError("Not enough space to hold HSP data structure");
+    return NULL;
+  }
 
   /* HSP */
   if ((allHsp->hsps =
-       (hsp ** *) calloc(STRANDS*FRAMES, sizeof(hsp**))) == NULL)
+       (hsp ** *) calloc(STRANDS*FRAMES, sizeof(hsp**))) == NULL) {
     printError("Not enough space to hold HSP 6-array");  
+    return NULL;
+  }
 
-
-  for(i=0;i<STRANDS*FRAMES;i++)
+  for(i=0;i<STRANDS*FRAMES;i++) {
     if ((allHsp->hsps[i] =
-	 (hsp**) calloc(NUMHSPS, sizeof(hsp*)))  == NULL)
+	      (hsp**) calloc(NUMHSPS, sizeof(hsp*))) == NULL) {
       printError("Not enough space to hold HSPs");
+      return NULL;
+    }
+  }
 
   /* Counters */
   if ((allHsp->nHsps =
-       (long*) calloc(STRANDS*FRAMES, sizeof(long)))  == NULL)
+       (long*) calloc(STRANDS*FRAMES, sizeof(long))) == NULL) {
     printError("Not enough space to hold HSP counters");  
+    return NULL;
+  }
 
   /* Hack of Alpha */
   for(i=0;i<STRANDS*FRAMES;i++)
@@ -51,8 +59,10 @@ packSR* RequestMemorySR()
   int i;
 
   if ((allSr =
-       (packSR*) malloc(sizeof(packSR)))  == NULL)
+       (packSR*) malloc(sizeof(packSR)))  == NULL) {
     printError("Not enough space to hold SR data structure");
+    return NULL;
+  }
 
   for(i=0;i<STRANDS*FRAMES;i++)
     {
@@ -64,4 +74,30 @@ packSR* RequestMemorySR()
   allSr->nSR = 0;
   
   return(allSr);
+}
+
+void FreeSR(sr_t* q) {
+  if (q != NULL) {
+    FreeSR(q->next);
+    free(q);
+  }
+}
+
+
+void FreeMemorySR(packSR* allSR) {
+  for(int i=0; i<STRANDS*FRAMES; i++) {
+    FreeSR(allSR->sr[i]);      
+  }
+  free(allSR);
+}
+
+void FreeMemoryHSP(packHSP* allHSP) {
+  for(int i=0;i<STRANDS*FRAMES;i++) {
+    for(int j=0;j<allHSP->nTotalHsps;j++)
+      free(allHSP->hsps[i][j]);
+    free(allHSP->hsps[i]);
+  }
+  free(allHSP->hsps);
+  free(allHSP->nHsps);
+  free(allHSP);
 }

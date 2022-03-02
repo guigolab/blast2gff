@@ -27,3 +27,7 @@ account* InitAcc()
 
   return(m);
 }
+
+void FreeAcc(account* m) {
+  free(m);
+}

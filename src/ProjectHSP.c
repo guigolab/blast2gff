@@ -108,8 +108,10 @@ sr_t* RequestMemoryNewSR()
 {
   sr_t* s;
   
-  if ((s = (sr_t *) malloc(sizeof(sr_t))) == NULL)
+  if ((s = (sr_t *) malloc(sizeof(sr_t))) == NULL) {
     printError("Not enough space to hold one new SR");
+	return NULL;
+  }
 
   // Initilize array
   for(int i=0;i<LOCUSLENGTH;i++)
@@ -118,7 +120,7 @@ sr_t* RequestMemoryNewSR()
   return(s);
 }
 
-void project1HSP(hsp** hsps, long nHSP, packSR *allSr)
+int project1HSP(hsp** hsps, long nHSP, packSR *allSr)
 {
   int index;
   long i;
@@ -357,13 +359,19 @@ void project1HSP(hsp** hsps, long nHSP, packSR *allSr)
       
       /*  printSR(allSr->sr[index],i); */
     }/* endfor */
+	return 0;
 }
 
-void ProjectHSP(packHSP *allHsp, packSR *allSr)
+int ProjectHSP(packHSP *allHsp, packSR *allSr)
 {
   int i;
+  int ret;
   
   /* projecting all the strands and frames */ 
-  for(i=0; i<STRANDS*FRAMES; i++)
-    project1HSP(allHsp->hsps[i],allHsp->nHsps[i],allSr);
+  for(i=0; i<STRANDS*FRAMES; i++) {
+    ret = project1HSP(allHsp->hsps[i],allHsp->nHsps[i],allSr);
+	if(ret!=0)
+		break;
+  }
+  return(ret);
 }
